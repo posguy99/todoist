@@ -25,6 +25,18 @@ Copyright &copy; 2014 Marc Wilson <<posguy99@gmail.com>>
 			 enforce OS X 10.8 dependency (msw 121414)
 			 remove log file write as it is insecure (exposes API token) (msw 121414)
 			 add first-run dialog and prompt for API token (msw 121414)
+		0.9 - fixed replace_chars() to save/restore the tid's (msw 122814)
+			 use OS X defaults system (msw 122814)
+			 remove token dot-file if present (msw 122814)
+			 keep API token in defaults rather than in a dot-file (msw 122814)
+			 removed priority from email in favor of settable default (msw 122814)
+			 add control for changing the default due date (msw 122814)
+			 add control for whether to add the message URL (msw 122814)
+			 add control for whether to add the envelope icon (msw 122814)
+			 add control for adding the message body as a note (msw 122814)
+			 add control for setting the priority (msw 122814)
+			 fixed ordering of first run test (msw 010415)
+			 enforce dep on 10.9 for 'display notification' (msw 010415)
 
 ---
 
