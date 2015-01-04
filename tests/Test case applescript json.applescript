@@ -1,12 +1,12 @@
 
-set result to do shell script "curl -X POST -d 'content= from Sriprachandr, Patrick message://<F8DF97B4776D974CA13EF1B6F036F6C01B475FBD@FTCSEAP4003.nam.int.local>' -d 'token=e3e9074ef60cce6e6dbb7b0e506c1d2b11ccb09c'  -d 'priority=0' -d 'date_string=today' -d 'note=Final%3D10586%2Cforecast%3D11500%2Cprojection%3D10800%2Cpace%3D11500%2Cinpark%3D7145%2Cweathercode%3D1%2DSunny%2Cheroes%3D474%20%0A' https://todoist.com/API/additem | sed 's/^.\\(.*\\).$/\\1/' "
+set result to do shell script "curl -X POST -d 'content= from Sriprachandr, Patrick message://<F8DF97B4776D974CA13EF1B6F036F6C01B475FBD@FTCSEAP4003.nam.int.local>' -d 'token='  -d 'priority=0' -d 'date_string=today' -d 'note=Final%3D10586%2Cforecast%3D11500%2Cprojection%3D10800%2Cpace%3D11500%2Cinpark%3D7145%2Cweathercode%3D1%2DSunny%2Cheroes%3D474%20%0A' https://todoist.com/API/additem | sed 's/^.\\(.*\\).$/\\1/' "
 
 tell application "JSON Helper"
 	set myRecord to read JSON from "{" & result & "}"
 	return myRecord
 end tell
 
--- set result to do shell script "curl -X POST -d 'content= from Sriprachandr, Patrick message://<F8DF97B4776D974CA13EF1B6F036F6C01B475FBD@FTCSEAP4003.nam.int.local>' -d 'token=e3e9074ef60cce6e6dbb7b0e506c1d2b11ccb09c'  -d 'priority=0' -d 'date_string=today' -d 'note=Final%3D10586%2Cforecast%3D11500%2Cprojection%3D10800%2Cpace%3D11500%2Cinpark%3D7145%2Cweathercode%3D1%2DSunny%2Cheroes%3D474%20%0A' https://todoist.com/API/additem"
+-- set result to do shell script "curl -X POST -d 'content= from Sriprachandr, Patrick message://<F8DF97B4776D974CA13EF1B6F036F6C01B475FBD@FTCSEAP4003.nam.int.local>' -d 'token='  -d 'priority=0' -d 'date_string=today' -d 'note=Final%3D10586%2Cforecast%3D11500%2Cprojection%3D10800%2Cpace%3D11500%2Cinpark%3D7145%2Cweathercode%3D1%2DSunny%2Cheroes%3D474%20%0A' https://todoist.com/API/additem"
 
 (*
 set _count to 0
