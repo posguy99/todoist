@@ -1,3 +1,4 @@
+#!/usr/bin/osascript
 (*
 	Create Todoist Task From Email
 	Copyright (c) 2014, Marc Wilson (posguy99@gmail.com)
