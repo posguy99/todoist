@@ -1,8 +1,10 @@
 Create Todoist Task From Email
 ==============================
+
 Copyright &copy; 2014 Marc Wilson <<posguy99@gmail.com>>
 
 ---
+
 	Version history:
 		
 		0.1 - initial creation (msw 113014)
@@ -68,6 +70,7 @@ The script will store the API key in defaults as todoistCreateTaskAPIToken.
 
 Usage
 -----
+
 * Select a single email and a task will be created in the Inbox.
 	
 * Select multiple email and you will be asked whether to create a Project or to add the email to an existing Project.
