@@ -50,6 +50,22 @@ A hotkey can be assigned to the script with a utility such as FastScripts, or tu
 On the first run  of the script, there will be a prompt for your API token.
 
 
+Configuration
+-------------
+
+The script has sensible defaults.  The following settings can be changed:
+
+    defaults write me.mwilson.scripts todoistCreateTaskAddBodyAsNote -bool {TRUE|FALSE}
+    defaults write me.mwilson.scripts todoistCreateTaskAddIcon -bool {TRUE|FALSE}
+    defaults write me.mwilson.scripts todoistCreateTaskAddURL -bool {TRUE|FALSE}
+    defaults write me.mwilson.scripts todoistCreateTaskDueDate "tomorrow"
+    defaults write me.mwilson.scripts todoistCreateTaskPriority {1|2|3|4}
+
+Without changes, the defaults are priority low, add the body as a note, add the message URL, and don't add the icon.
+
+The script will store the API key in defaults as todoistCreateTaskAPIToken.
+
+
 Usage
 -----
 * Select a single email and a task will be created in the Inbox.
@@ -58,6 +74,12 @@ Usage
 	
 * Email content will become the first Note attached to the created Task or Tasks.
 
-* Created Tasks will have a default due date of today.
 
-* The email priority will become the Task Priority.
+Notes
+------
+
+Adding the message URL will break the iOS Today widget (if you use it).  Clicking the inserted message URL in the Outlook
+Add-In will cause the Add-In to crash and require you to restart Outlook.  Apparently unrecognized URL schemes on Windows
+are... bad.
+
+
