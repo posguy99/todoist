@@ -39,6 +39,7 @@ Copyright &copy; 2014 Marc Wilson <<posguy99@gmail.com>>
 			 add control for setting the priority (msw 122814)
 			 fixed ordering of first run test (msw 010415)
 			 enforce dep on 10.9 for 'display notification' (msw 010415)
+	    0.10 - fix missing JSHONHelperURL (msw via matthew caine 010915)
 
 ---
 

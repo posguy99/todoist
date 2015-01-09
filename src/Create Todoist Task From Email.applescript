@@ -81,6 +81,7 @@
 			 add control for setting the priority (msw 122814)
 			 fixed ordering of first run test (msw 010415)
 			 enforce dep on 10.9 for 'display notification' (msw 010415)
+		0.10 - fix missing JSHONHelperURL (msw via matthew caine 010915)
 
 
 
@@ -116,10 +117,12 @@ global theAppName
 global theAppVersion
 global addBodyAsNote
 
-set theAppVersion to "9"
-set theAppName to "Create Todoist Task From Email v" & theAppVersion
-
 -- set some variables
+
+set theAppVersion to "10"
+set theAppName to "Create Todoist Task From Email v" & theAppVersion
+set JSONHelperURL to "http://itunes.apple.com/app/json-helper-for-applescript/id453114608?mt=12"
+
 -- the envelope character is nice to include, set it in app defaults to turn it on
 
 set theIcon to («data utxt2709» as Unicode text) & " "
