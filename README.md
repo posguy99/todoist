@@ -42,6 +42,7 @@ Copyright &copy; 2014,2015 Marc Wilson <<posguy99@gmail.com>>
 	    0.10 - fix missing JSHONHelperURL (msw via matthew caine 010915)
 		0.11 - fix problem caused by non-English localization of OS X
 			   (msw via Karin Rosner and Diego Rosafio 022215)
+   		0.12 - fix missing variable from v11 fix (msw 022115)
 
 ---
 
