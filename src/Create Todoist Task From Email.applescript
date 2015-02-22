@@ -84,6 +84,7 @@
 		0.10 - fix missing JSHONHelperURL (msw via matthew caine 010915)
 		0.11 - fix problem caused by non-English localization of OS X
 			   (msw via Karin Rosner and Diego Rosafio 022215)
+		0.12 - fix missing variable from v11 fix (msw 022115)
 
 NOTE:  The v11 fix is *not* localization.  It corrects the script assuning buttons are labeled in
 English when AS is allowed to use default bvutton titles.
@@ -167,11 +168,11 @@ end try
 
 set theToken to my readDefaultsString(theAppDomain, "todoistCreateTaskAPIToken")
 if theToken is null then
-	display dialog "Missing Todoist API token.  Please enter your API token below." buttons {"Ok", "Cancel"} default answer "" default button "Cancel" with icon caution
-	if the button returned of the result is "Cancel" then
+	set _result to (display dialog "Missing Todoist API token.  Please enter your API token below." buttons {"Ok", "Cancel"} default answer "" default button "Cancel" with icon caution)
+	if the button returned of the _result is "Cancel" then
 		error number -128
 	end if
-	set theToken to (text returned of result)
+	set theToken to the text returned of the _result
 	my writeDefaultsString(theAppDomain, "todoistCreateTaskAPIToken", theToken)
 end if
 
