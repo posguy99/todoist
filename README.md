@@ -1,7 +1,7 @@
 Create Todoist Task From Email
 ==============================
 
-Copyright &copy; 2014 Marc Wilson <<posguy99@gmail.com>>
+Copyright &copy; 2014,2015 Marc Wilson <<posguy99@gmail.com>>
 
 ---
 
@@ -40,6 +40,8 @@ Copyright &copy; 2014 Marc Wilson <<posguy99@gmail.com>>
 			 fixed ordering of first run test (msw 010415)
 			 enforce dep on 10.9 for 'display notification' (msw 010415)
 	    0.10 - fix missing JSHONHelperURL (msw via matthew caine 010915)
+		0.11 - fix problem caused by non-English localization of OS X
+			   (msw via Karin Rosner and Diego Rosafio 022215)
 
 ---
 
