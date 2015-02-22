@@ -87,7 +87,7 @@
 		0.12 - fix missing variable from v11 fix (msw 022115)
 
 NOTE:  The v11 fix is *not* localization.  It corrects the script assuning buttons are labeled in
-English when AS is allowed to use default bvutton titles.
+English when AS is allowed to use default button titles.
 
 
 	Defauts:			 
