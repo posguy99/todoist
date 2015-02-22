@@ -205,7 +205,7 @@ if theDate is null then
 	set theDate to "today"
 end if
 
--- get the prioroty to set
+-- get the priority to set
 -- the default is 1
 
 set thePriority to my readDefaultsString(theAppDomain, "todoistCreateTaskPriority")
@@ -718,9 +718,8 @@ Select multiple email and you will be asked whether to create a Project or to ad
 	
 Email content will become the first Note attached to the created Task or Tasks.
 
-Created Tasks will have a default due date of today.
+Created Tasks will have a default due date of tomorrow.
 
-The email priority will become the Task Priority.
 "
 	my dialog_Info(_message)
 	
