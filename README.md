@@ -53,7 +53,7 @@ Copy the script to $HOME/Library/Scripts.
 
 A hotkey can be assigned to the script with a utility such as FastScripts, or turn on the script menu from AppleScript Editor and run it that way.
 
-On the first run  of the script, there will be a prompt for your API token.
+On the first run of the script, there will be a prompt for your API token.
 
 
 Configuration
