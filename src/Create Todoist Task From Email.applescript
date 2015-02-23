@@ -1,7 +1,7 @@
 #!/usr/bin/osascript
 (*
 	Create Todoist Task From Email
-	Copyright (c) 2014, Marc Wilson (posguy99@gmail.com)
+	Copyright (c) 2014,2015 Marc Wilson (posguy99@gmail.com)
 	All rights reserved.
 	
 	Redistribution and use in source and binary forms, with or without
@@ -47,49 +47,6 @@
 	I crib (copy, steal) shamelessly from other people, which makes the coding style look very... odd.  I'll fix it,
 	eventually.
 		
-	Version history:
-		
-		0.1 - initial creation (msw 113014)
-		0.2 - create token file if not found (msw 113014)
-		0.3 - display notification (msw 113014)
-		0.4 - save result of API call (msw 120714)
-			 add message URL to task title (msw 120714)
-			 add message content as a note (msw 120714)
-		0.5 - much re-factoring to make easier to understand (msw 120714)
-			 added weak dependency on JSON Helper (annoying!) (msw 120714)
-			 writes a log file (msw 120714)
-			 better error checking (msw 120714)
-		0.6 - offer to create a project for email(s) if multiple selected (msw 120714)
-			 still more error checking (msw 120714)
-			 friendlier dialogs (msw 120714)
-		0.7 - Retrieve list of projects to choose from (msw 120814)
-			 fix really stupid bug that broke single add in v6 (msw 120814)
-			 fix more really stupid logic errors (msw 120814)
-		0.8 - enforce JSON Helper Dependency (msw 121414)
-			 enforce OS X 10.8 dependency (msw 121414)
-			 remove log file write as it is insecure (exposes API token) (msw 121414)
-			 add first-run dialog and prompt for API token (msw 121414)
-		0.9 - fixed replace_chars() to save/restore the tid's (msw 122814)
-			 use OS X defaults system (msw 122814)
-			 remove token dot-file if present (msw 122814)
-			 keep API token in defaults rather than in a dot-file (msw 122814)
-			 removed priority from email in favor of settable default (msw 122814)
-			 add control for changing the default due date (msw 122814)
-			 add control for whether to add the message URL (msw 122814)
-			 add control for whether to add the envelope icon (msw 122814)
-			 add control for adding the message body as a note (msw 122814)
-			 add control for setting the priority (msw 122814)
-			 fixed ordering of first run test (msw 010415)
-			 enforce dep on 10.9 for 'display notification' (msw 010415)
-		0.10 - fix missing JSHONHelperURL (msw via matthew caine 010915)
-		0.11 - fix problem caused by non-English localization of OS X
-			   (msw via Karin Rosner and Diego Rosafio 022215)
-		0.12 - fix missing variable from v11 fix (msw 022115)
-
-NOTE:  The v11 fix is *not* localization.  It corrects the script assuning buttons are labeled in
-English when AS is allowed to use default button titles.
-
-
 	Defauts:			 
 			 todoistCreateTaskRunOnce : boolean
 			 (whether or not to display the first run dialog, will be created)
@@ -138,13 +95,6 @@ set theIcon to («data utxt2709» as Unicode text) & " "
 my clean_up_log_file()
 my clean_up_token_file()
 
--- check for first run
-
-if (my readDefaultsBoolean(theAppDomain, "todoistCreateTaskFirstRun")) is null then
-	my display_first_run()
-	my writeDefaultsBoolean(theAppDomain, "todoistCreateTaskFirstRun", "TRUE")
-end if
-
 -- test OS version
 
 set _os_version to (second text item of my get_os_version()) as number
@@ -162,7 +112,14 @@ on error
 	my dialog_error("JSON Helper is required.  You may install it from" & return & JSONHelperURL)
 end try
 
--- ok, we got here, so OS is at least ML, and JSON Helper is available
+-- ok, we got here, so OS is at least Mav, and JSON Helper is available
+
+-- check for first run
+
+if (my readDefaultsBoolean(theAppDomain, "todoistCreateTaskFirstRun")) is null then
+	my display_first_run()
+	my writeDefaultsBoolean(theAppDomain, "todoistCreateTaskFirstRun", "TRUE")
+end if
 
 -- get the API token
 
