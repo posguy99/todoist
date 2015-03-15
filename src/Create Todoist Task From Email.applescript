@@ -486,7 +486,7 @@ end encode_char
 -- for definitions of encode_URL_A and encode_URL_B see above URL
 
 on encode_text(this_text, encode_URL_A, encode_URL_B)
-	set the standard_characters to "abcdefghijklmnopqrstuvwxyz0123456789"
+	set the standard_characters to "abcdefghijklmnopqrstuvwxyzõäöü0123456789"
 	set the URL_A_chars to "$+!'/?;&@=#%><{}[]\"~`^\\|*"
 	set the URL_B_chars to ".-_:"
 	set the acceptable_characters to the standard_characters
