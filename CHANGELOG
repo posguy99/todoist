@@ -40,3 +40,5 @@ NOTE:  The v11 fix is *not* localization.  It corrects the script assuning butto
 English when AS is allowed to use default button titles.
 
    		0.12 - fix missing variable from v11 fix (msw 022115)
+		0.13 - add accented characters to standard_encoding (msw via @Jan 031515)
+		
