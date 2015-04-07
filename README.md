@@ -11,7 +11,9 @@ Installation
 
 Copy the script to $HOME/Library/Scripts.
 
-A hotkey can be assigned to the script with a utility such as FastScripts, or turn on the script menu from AppleScript Editor and run it that way.
+I suggest using [FastScripts](http://www.red-sweater.com/fastscripts/) to generate context-sensitive hotkeys for scripts.  It is free for up to ten shortcuts.
+
+A good reference for creating hotkeys for scripts using Automator can be found at [veritrope.com](http://veritrope.com/the-basics-using-keyboard-shortcuts-with-applescripts/).
 
 On the first run of the script, there will be a prompt for your API token.
 
