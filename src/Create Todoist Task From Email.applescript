@@ -81,7 +81,7 @@ global addBodyAsNote
 
 -- set some variables
 
-set theAppVersion to "12"
+set theAppVersion to "13"
 set theAppName to "Create Todoist Task From Email v" & theAppVersion
 set JSONHelperURL to "http://itunes.apple.com/app/json-helper-for-applescript/id453114608?mt=12"
 
