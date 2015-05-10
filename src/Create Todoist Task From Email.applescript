@@ -61,6 +61,8 @@
 			 todoistCreateTaskAddIcon : boolean (default false)
 			 todoistCreateTaskAddBodyAsNote : boolean (default true)
 			 todoistCreateTaskPriority : string (default "0")
+			 todoistCreateTaskAskForSubject : boolean (default true)
+			 todoistCreateTaskIncludeSender : boolean (default true)
 
 iMac $ defaults read me.mwilson.scripts
 {
@@ -70,7 +72,9 @@ iMac $ defaults read me.mwilson.scripts
     todoistCreateTaskAddURL = 1;
     todoistCreateTaskDueDate = tomorrow;
     todoistCreateTaskFirstRun = 1;
-    todoistCreateTaskPriority = 1;
+    todoistCreateTaskPriority = 0;
+	todoistCreateTaskAskForSubject = 1;
+	todoistCreateTaskIncludeSender = 1;
 }
 
 *)
@@ -84,6 +88,8 @@ global addIcon
 global addBodyAsNote
 global theDate
 global thePriority
+global askForSubject
+global includeSender
 
 -- set some variables
 
@@ -178,7 +184,11 @@ tell application "Mail"
 			set theURL to "message://<" & theMessage's message id & ">"
 		end if
 
-		set theName to the subject of theMessage
+		if askForSubject is false then
+			set theName to the subject of theMessage
+		else
+			set theName to (my dialog_Prompt("Task Name: "))
+		end if
 
 		set theNote to ""
 		if addBodyAsNote then
@@ -187,14 +197,18 @@ tell application "Mail"
 
 		-- pull the human-readable name out of the sender string
 
-		set theSender to (extract name from sender of theMessage)
+		if includeSender is true
+			set theSender to " from " & (extract name from sender of theMessage)
+		else
+			set theSender to ""
+		end if
 
 		-- build the task title
 
 		if addIcon then
-			set theContent to theIcon & theName & " from " & theSender & " " & theURL
+			set theContent to theIcon & theName & theSender & " " & theURL
 		else
-			set theContent to theName & " from " & theSender & " " & theURL
+			set theContent to theName & theSender & " " & theURL
 		end if
 
 		-- create a new task with the information from the message
@@ -629,7 +643,6 @@ on get_api_token()
 		return theValue
 end get_api_token
 
-
 on read_app_defaults()
 
 	-- Are we adding the message URL to the task?
@@ -674,11 +687,21 @@ on read_app_defaults()
 	if thePriority is null then
 		set thePriority to "1"
 	end if
+
+	-- are we asking for a subject
+	set askForSubject to false
+	set _temp to my readDefaultsBoolean(theAppDomain, "todoistCreateTaskAskForSubject")
+	if _temp is not null then
+		set askForSubject to _temp
+	end if
+
+	-- are we including from
+	set includeSender to true
+	set _temp to my readDefaultsBoolean(theAppDomain, "todoistCreateTaskIncludeSender")
+	if _temp is not null then
+		set includeSender to _temp
+	end if
 end read_app_defaults
-
-
-
-
 
 -- clean up the security hole from the log file we were creating
 
