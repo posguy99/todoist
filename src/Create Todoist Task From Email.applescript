@@ -3,12 +3,12 @@
 	Create Todoist Task From Email
 	Copyright (c) 2014,2015 Marc Wilson (posguy99@gmail.com)
 	All rights reserved.
-	
+
 	Redistribution and use in source and binary forms, with or without
 	modification, are permitted provided that the following conditions are met:
 
 	1. Redistributions of source code must retain the above copyright notice, this
-	   list of conditions and the following disclaimer. 
+	   list of conditions and the following disclaimer.
 	2. Redistributions in binary form must reproduce the above copyright notice,
 	   this list of conditions and the following disclaimer in the documentation
 	   and/or other materials provided with the distribution.
@@ -24,6 +24,8 @@
 	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+	Github Repository at: http://github.com/posguy99/todoist
+
 	Originally based on https://github.com/joehooper/todoist-outlook-2011
 	(license unknown)
 
@@ -31,29 +33,29 @@
 	Write to a file cribbed from http://www.macosxautomation.com/applescript/sbrt/sbrt-09.html
 	List manipulation cribbed from http://www.macosxautomation.com/applescript/sbrt/sbrt-07.html
 	(license unknown but assumed to be public domain)
-	
+
 	JSON Helper can be found at http://itunes.apple.com/app/json-helper-for-applescript/id453114608?mt=12
-	
+
 	Todoist API documentation is at http://todoist.com/API
-	
+
 	Notes:
-		
+
 	If you use conversations, it will add all messages from the conversation
 	as individual tasks unless you explicitly open only one message.
-		
+
 	Eventually what I want to do for conversations is have one task created, and the other email(s) be sub-tasks
 	under it.
 
 	I crib (copy, steal) shamelessly from other people, which makes the coding style look very... odd.  I'll fix it,
 	eventually.
-		
-	Defauts:			 
+
+	Defauts:
 			 todoistCreateTaskRunOnce : boolean
 			 (whether or not to display the first run dialog, will be created)
-			 
+
 			 todoistCreateTaskAPIToken : string (no default, user defined, no error checking)
 			 (this one will be created by the script if it does not exist)
-			 
+
 			 todoistCreateTaskDueDate : string (default today)
 			 todoistCreateTaskAddURL : boolean (default false)
 			 todoistCreateTaskAddIcon : boolean (default false)
@@ -77,7 +79,11 @@ property theAppDomain : "me.mwilson.scripts"
 
 global theAppName
 global theAppVersion
+global addURL
+global addIcon
 global addBodyAsNote
+global theDate
+global thePriority
 
 -- set some variables
 
@@ -91,120 +97,51 @@ set theIcon to («data utxt2709» as Unicode text) & " "
 
 -- clean ups
 -- we do not return if either were true
-
 my clean_up_log_file()
 my clean_up_token_file()
 
--- test OS version
-
-set _os_version to (second text item of my get_os_version()) as number
-if (_os_version < 9) then
-	my dialog_error("OS X 10.9 or later (Mavericks) is required." & return & "Please upgrade your OS to use this script.")
-end if
-
--- test for JSON Helper
-
-try
-	tell application "Finder" to get application file id "com.vidblishen.jsonhelper"
-	set JSONHelperExists to true
-on error
-	set JSONHelperExists to false
-	my dialog_error("JSON Helper is required.  You may install it from" & return & JSONHelperURL)
-end try
+-- check script requirements
+my check_os_version()
+my check_for_json_helper()
 
 -- ok, we got here, so OS is at least Mav, and JSON Helper is available
 
 -- check for first run
+my check_for_first_run()
 
-if (my readDefaultsBoolean(theAppDomain, "todoistCreateTaskFirstRun")) is null then
-	my display_first_run()
-	my writeDefaultsBoolean(theAppDomain, "todoistCreateTaskFirstRun", "TRUE")
-end if
+-- read parameters from defaults
+my read_app_defaults()
 
 -- get the API token
-
-set theToken to my readDefaultsString(theAppDomain, "todoistCreateTaskAPIToken")
-if theToken is null then
-	set _result to (display dialog "Missing Todoist API token.  Please enter your API token below." buttons {"Ok", "Cancel"} default answer "" default button "Cancel" with icon caution)
-	if the button returned of the _result is "Cancel" then
-		error number -128
-	end if
-	set theToken to the text returned of the _result
-	my writeDefaultsString(theAppDomain, "todoistCreateTaskAPIToken", theToken)
-end if
-
--- got here, so we have a valid token and all the dependencies are available
-
--- Are we adding the message URL to the task?
--- the default is no
-
-set addURL to false
-set _temp to my readDefaultsBoolean(theAppDomain, "todoistCreateTaskAddURL")
-if _temp is not null then
-	set addURL to _temp
-end if
-
--- are we adding the icon?
--- the default is no
-
-set addIcon to false
-set _temp to my readDefaultsBoolean(theAppDomain, "todoistCreateTaskAddIcon")
-if _temp is not null then
-	set addIcon to _temp
-end if
-
--- are we adding the body?
--- the default is true
-
-set addBodyAsNote to true
-set _temp to my readDefaultsBoolean(theAppDomain, "todoistCreateTaskAddBodyAsNote")
-if _temp is not null then
-	set addBodyAsNote to _temp
-end if
-
--- get the due date
--- the default is today
-
-set theDate to my readDefaultsString(theAppDomain, "todoistCreateTaskDueDate")
-if theDate is null then
-	set theDate to "today"
-end if
-
--- get the priority to set
--- the default is 1
-
-set thePriority to my readDefaultsString(theAppDomain, "todoistCreateTaskPriority")
-if thePriority is null then
-	set thePriority to "1"
-end if
+set theToken to my get_api_token()
 
 -- main loop
 
 tell application "Mail"
-	
+
 	-- get the currently selected message or messages
-	
+
 	set selectedMessages to selection
-	
+
 	-- if there are no messages selected, warn the user and then quit
-	
+
 	if selectedMessages is {} then
 		my dialog_Info("Please select a message first.")
 		return
 	end if
-	
+
 	-- start out with an empty projectID, which is equivalent to the Inbox
 	set theProject to ""
 	set _createProject to null
-	
+
 	-- _createProject will end up either being null, or the name of the Project to create
 	-- JSON Helper is necessary to parse the return from the project creation to get the project_id
-	
+
 	if (count of selectedMessages) > 1 then
 		set theProjectList to my Todoist_GetAllProjects(theToken)
 		set _createProject to (my dialog_Question("There are " & (count of selectedMessages) & " email messages selected." & return & "Do you want to create a Project for them?" & return & return & "Specify the Project name below."))
 	end if
-	
+
 	if (count of selectedMessages) > 1 then
 		-- do we want to add to an existing proect?
 		if (_createProject is null) then
@@ -229,47 +166,47 @@ tell application "Mail"
 			set theProject to ""
 		end if
 	end if
-	
+
 	-- ok, we now either have a project_id that will be used with Todoist_AddItem()
 	-- or it's null
-	
+
 	repeat with theMessage in selectedMessages
-		
+
 		-- get the information from this message, and store it in variables
 		set theURL to ""
 		if addURL then
 			set theURL to "message://<" & theMessage's message id & ">"
 		end if
-		
+
 		set theName to the subject of theMessage
-		
+
 		set theNote to ""
 		if addBodyAsNote then
 			set theNote to content of theMessage as rich text
 		end if
-		
+
 		-- pull the human-readable name out of the sender string
-		
+
 		set theSender to (extract name from sender of theMessage)
-		
+
 		-- build the task title
-		
+
 		if addIcon then
 			set theContent to theIcon & theName & " from " & theSender & " " & theURL
 		else
 			set theContent to theName & " from " & theSender & " " & theURL
 		end if
-		
+
 		-- create a new task with the information from the message
-		
+
 		set theReturn to my Todoist_AddItem(theToken, theContent, thePriority, theDate, theNote, theProject)
-		
+
 		-- we can do something nifty with theReturn later, maybe
-		
+
 	end repeat
-	
+
 	-- display notification to the user
-	
+
 	if (count of selectedMessages) > 1 then
 		set _notification to ((count of selectedMessages) as string) & " tasks were added."
 	else
@@ -278,10 +215,10 @@ tell application "Mail"
 	if _createProject is not null then
 		set _notification to ("1 project was created." & return & _notification)
 	end if
-	
+
 	display notification _notification with title "Todoist"
 	delay 1
-	
+
 end tell
 
 -- call the Todoist API to add an item
@@ -289,43 +226,43 @@ end tell
 -- does not return if unsuccessful which is probably a bad idea...
 
 on Todoist_AddItem(_token, _content, _priority, _date, _note, _project)
-	
+
 	-- fixme: this produces semi-garbage for MS-Exchange messages due to conditionals in RTF formatting
 	-- fixme: it's readable for stuff from work, but...
-	
+
 	if addBodyAsNote then
 		set _encodedNote to encode_text(_note, true, true)
 		set _postToAPI to "curl -X POST -d 'content=" & _content & "' -d 'token=" & _token & "'  -d 'project_id=" & _project & "' -d 'priority=" & _priority & "' -d 'date_string=" & _date & "' -d 'note=" & _encodedNote & "' https://todoist.com/API/additem | sed 's/^.\\(.*\\).$/\\1/' "
 	else
 		set _postToAPI to "curl -X POST -d 'content=" & _content & "' -d 'token=" & _token & "'  -d 'project_id=" & _project & "' -d 'priority=" & _priority & "' -d 'date_string=" & _date & "' https://todoist.com/API/additem | sed 's/^.\\(.*\\).$/\\1/' "
 	end if
-	
+
 	-- curl will encode the data in the POST according to MIME-type application/x-www-form-urlencoded so
 	-- all the escapes will be done for us
-	
+
 	try
 		-- fixme: I would really like to get JSON Helper to work here, but it always garbages the task title (the content field), even
 		-- fixme: when the note field ends up correctly formatted.  Every on-line example I can find for using it is exactly the same.
 		-- fixme:  meanwhile, curl works...
-		
+
 		set _temp to do shell script _postToAPI
-		
+
 	on error
 		-- curl returned a non-zero result, must be bad!
 		my dialog_error("Non-zero error return from Todoist API call!")
 	end try
-	
+
 	if _temp is null then
 		my dialog_error("Null response from Todoist API call!")
 	end if
-	
+
 	set _return to _temp
-	
+
 	-- save return from API call if it was non NULL
 	-- return an AppleScript property list with the decoded JSON response
-	
+
 	-- fixme: aren't we clipping off the braces above and putting them back below so JSON Helper can decode?  silly...
-	
+
 	try
 		tell application "JSON Helper"
 			set _return to read JSON from "{" & _temp & "}"
@@ -333,9 +270,9 @@ on Todoist_AddItem(_token, _content, _priority, _date, _note, _project)
 	on error
 		my dialog_error("JSON Helper unable to parse result from API call!")
 	end try
-	
+
 	return _return
-	
+
 end Todoist_AddItem
 
 -- call the Todoist API to add a project
@@ -345,12 +282,12 @@ end Todoist_AddItem
 -- does not return if unsuccessful which is probably a bad idea...
 
 on Todoist_AddProject(_token, _name)
-	
+
 	-- JSON Helper is necessary here (because we need to be able to extract the project_id)
-	
+
 	-- curl will encode the data in the POST according to MIME-type application/x-www-form-urlencoded so
 	-- all the escapes will be done for us
-	
+
 	try
 		set _postToAPI to "curl -X POST -d 'name=" & _name & "' -d 'token=" & _token & "' https://todoist.com/API/addproject | sed 's/^.\\(.*\\).$/\\1/' "
 		set _temp to do shell script _postToAPI
@@ -358,15 +295,15 @@ on Todoist_AddProject(_token, _name)
 		-- curl returned a non-zero result, must be bad!
 		my dialog_error("Non-zero error return from Todoist API call!")
 	end try
-	
+
 	if _temp is null then
 		my dialog_error("Null response from Todoist API call!")
 	end if
-	
+
 	-- save return from API call if it was non NULL
-	
+
 	-- fixme: aren't we clipping off the braces above and putting them back below so JSON Helper can decode?  silly...
-	
+
 	try
 		tell application "JSON Helper"
 			set _return to read JSON from "{" & _temp & "}"
@@ -374,16 +311,16 @@ on Todoist_AddProject(_token, _name)
 	on error
 		my dialog_error("JSON Helper unable to parse result from API call!")
 	end try
-	
+
 	set _projectID to (|id| of _return)
 	return _projectID
-	
+
 end Todoist_AddProject
 
 -- retrieve all project names from the API
 
 on Todoist_GetAllProjects(_token)
-	
+
 	try
 		tell application "JSON Helper"
 			set _URL to "https://todoist.com/API/getProjects?token=" & _token
@@ -393,29 +330,29 @@ on Todoist_GetAllProjects(_token)
 	on error
 		my dialog_error("JSON Helper unable to parse result from API call!")
 	end try
-	
+
 	-- ok, myRecord is the JSON result of the query
 	-- bomb if we got a null return, which should be impossible, as the Inbox project should always be there
-	
+
 	if myRecord is null then
 		return null
 	end if
-	
+
 	-- now build a structure we can actually use
-	
+
 	set projectNameList to null
 	set projectRecord to {}
-	
+
 	repeat with thisProject in myRecord
 		set thisProjectName to (|name| in thisProject)
 		set thisProjectID to (|id| in thisProject)
 		set Project to {|name|:thisProjectName, |id|:thisProjectID}
 		set projectRecord to projectRecord & {Project}
 	end repeat
-	
+
 	-- we return an AppleScript property list, {name : id} for each project
 	return projectRecord
-	
+
 end Todoist_GetAllProjects
 
 -- stubs for future use
@@ -481,7 +418,7 @@ on encode_char(this_char)
 	return ("%" & x & y) as string
 end encode_char
 
--- this sub-routine is used to encode text 
+-- this sub-routine is used to encode text
 -- From http://www.macosxautomation.com/applescript/sbrt/sbrt-08.html
 -- for definitions of encode_URL_A and encode_URL_B see above URL
 
@@ -523,7 +460,7 @@ on decode_chars(these_chars)
 	return (ASCII character ASCII_num)
 end decode_chars
 
--- this sub-routine is used to decode text strings 
+-- this sub-routine is used to decode text strings
 -- From http://www.macosxautomation.com/applescript/sbrt/sbrt-08.html
 
 on decode_text(this_text)
@@ -618,10 +555,14 @@ on readDefaultsString(_domain, _key)
 	return _value
 end readDefaultsString
 
+-- write a string to defaults
+
 on writeDefaultsString(_domain, _key, _value)
 	set command to "/usr/bin/defaults write " & _domain & space & _key & space & _value
 	return the text of (do shell script command)
 end writeDefaultsString
+
+-- read a boolean from defaults
 
 on readDefaultsBoolean(_domain, _key)
 	set command to "/usr/bin/defaults read " & _domain & space & _key
@@ -637,10 +578,107 @@ on readDefaultsBoolean(_domain, _key)
 	end if
 end readDefaultsBoolean
 
+-- write a boolean to defaults
+
 on writeDefaultsBoolean(_domain, _key, _value)
 	set command to "/usr/bin/defaults write " & _domain & space & _key & " -bool " & _value
 	return the text of (do shell script command)
 end writeDefaultsBoolean
+
+-- test for required OS version
+on check_os_version()
+	set _os_version to (second text item of my get_os_version()) as number
+	if (_os_version < 9) then
+		my dialog_error("OS X 10.9 or later (Mavericks) is required." & return & "Please upgrade your OS to use this script.")
+	end if
+end check_os_version
+
+-- test for JSON Helper
+
+on check_for_json_helper()
+	try
+		tell application "Finder" to get application file id "com.vidblishen.jsonhelper"
+		set JSONHelperExists to true
+	on error
+		set JSONHelperExists to false
+		my dialog_error("JSON Helper is required.  You may install it from" & return & JSONHelperURL)
+	end try
+end check_for_json_helper
+
+-- check for first run
+
+on check_for_first_run()
+	if (my readDefaultsBoolean(theAppDomain, "todoistCreateTaskFirstRun")) is null then
+		my display_first_run()
+		my writeDefaultsBoolean(theAppDomain, "todoistCreateTaskFirstRun", "TRUE")
+	end if
+end check_for_first_run
+
+-- get the API token
+
+on get_api_token()
+	set theValue to my readDefaultsString(theAppDomain, "todoistCreateTaskAPIToken")
+		if theValue is null then
+			set _result to (display dialog "Missing Todoist API token.  Please enter your API token below." buttons {"Ok", "Cancel"} default answer "" default button "Cancel" with icon caution)
+			if the button returned of the _result is "Cancel" then
+				error number -128
+			end if
+			my writeDefaultsString(theAppDomain, "todoistCreateTaskAPIToken", theToken)
+			return (the text returned of the _result)
+		end if
+		return theValue
+end get_api_token
+
+
+on read_app_defaults()
+
+	-- Are we adding the message URL to the task?
+	-- the default is no
+
+	set addURL to false
+	set _temp to my readDefaultsBoolean(theAppDomain, "todoistCreateTaskAddURL")
+	if _temp is not null then
+		set addURL to _temp
+	end if
+
+	-- are we adding the icon?
+	-- the default is no
+
+	set addIcon to false
+	set _temp to my readDefaultsBoolean(theAppDomain, "todoistCreateTaskAddIcon")
+	if _temp is not null then
+		set addIcon to _temp
+	end if
+
+	-- are we adding the body?
+	-- the default is true
+
+	set addBodyAsNote to true
+	set _temp to my readDefaultsBoolean(theAppDomain, "todoistCreateTaskAddBodyAsNote")
+	if _temp is not null then
+		set addBodyAsNote to _temp
+	end if
+
+	-- get the due date
+	-- the default is today
+
+	set theDate to my readDefaultsString(theAppDomain, "todoistCreateTaskDueDate")
+	if theDate is null then
+		set theDate to "today"
+	end if
+
+	-- get the priority to set
+	-- the default is 1
+
+	set thePriority to my readDefaultsString(theAppDomain, "todoistCreateTaskPriority")
+	if thePriority is null then
+		set thePriority to "1"
+	end if
+end read_app_defaults
+
+
+
+
 
 -- clean up the security hole from the log file we were creating
 
@@ -678,14 +716,14 @@ Copyright (c) 2014 Marc Wilson <posguy99@gmail.com>
 
 
 Select a single email and a task will be created in the Inbox.
-	
+
 Select multiple email and you will be asked whether to create a Project or to add the email to an existing Project.
-	
+
 Email content will become the first Note attached to the created Task or Tasks.
 
 Created Tasks will have a default due date of tomorrow.
 
 "
 	my dialog_Info(_message)
-	
+
 end display_first_run
