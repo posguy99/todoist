@@ -637,8 +637,8 @@ on get_api_token()
             if the button returned of the _result is "Cancel" then
                 error number -128
             end if
-            my writeDefaultsString(theAppDomain, "todoistCreateTaskAPIToken", theToken)
-            return (the text returned of the _result)
+            set theValue to (the text returned of the _result)
+            my writeDefaultsString(theAppDomain, "todoistCreateTaskAPIToken", theValue)
         end if
         return theValue
 end get_api_token
