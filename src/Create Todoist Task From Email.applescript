@@ -735,7 +735,7 @@ end clean_up_token_file
 
 on display_first_run()
     set _message to "Create Todoist Task from Mail.app
-Copyright (c) 2014 Marc Wilson <posguy99@gmail.com>
+Copyright (c) 2014, 2015 Marc Wilson <posguy99@gmail.com>
 
 
 Select a single email and a task will be created in the Inbox.
