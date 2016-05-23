@@ -93,7 +93,7 @@ global includeSender
 
 -- set some variables
 
-set theAppVersion to "14"
+set theAppVersion to "15"
 set theAppName to "Create Todoist Task From Email v" & theAppVersion
 set JSONHelperURL to "http://itunes.apple.com/app/json-helper-for-applescript/id453114608?mt=12"
 
@@ -149,7 +149,7 @@ tell application "Mail"
     end if
 
     if (count of selectedMessages) > 1 then
-        -- do we want to add to an existing proect?
+        -- do we want to add to an existing project?
         if (_createProject is null) then
             set _projectList to my Todoist_GetAllProjects(theToken)
             set _projectNameList to {}
